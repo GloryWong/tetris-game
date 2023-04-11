@@ -3,9 +3,15 @@
     <div ref="container"></div>
     <div class="flex h-full flex-col space-y-3 p-5">
       <div ref="nextShapeContainer"></div>
-      <div class="flex flex-row space-x-2">
-        <div>status:</div>
-        <div>{{ status?.toUpperCase() }}</div>
+      <div class="flex flex-col space-y-2">
+        <div class="flex flex-row space-x-5">
+          <div>Lines</div>
+          <div>{{ lines }}</div>
+        </div>
+        <div class="flex flex-row space-x-5">
+          <div>Score</div>
+          <div>{{ score }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -18,6 +24,9 @@ import { Game } from '~/classes/Game';
 const container = ref<HTMLElement>();
 const nextShapeContainer = ref<HTMLElement>();
 const status = ref<AnimeStatus>();
+const score = ref<number>(0);
+const lines = ref<number>(0);
+
 let game: Game;
 
 onMounted(() => {
@@ -26,10 +35,19 @@ onMounted(() => {
   });
   window.__game__ = game;
 
-  const board = game.board;
-  status.value = board.status;
-  board.onStatusChange((val) => {
+  status.value = game.status;
+  game.onStatusChange((val) => {
     status.value = val;
+  });
+
+  score.value = game.score;
+  game.onScoreChange((val) => {
+    score.value = val;
+  });
+
+  lines.value = game.lines;
+  game.onLinesChange((val) => {
+    lines.value = val;
   });
 });
 

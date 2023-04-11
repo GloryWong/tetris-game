@@ -1,6 +1,6 @@
 export type AnimeStatus = 'ready' | 'running' | 'paused';
 export type AnimeAction = (...args: any[]) => any;
-export type StatusChangeCb = (
+export type AnimeStatusChangeCb = (
   status: AnimeStatus,
   oldStatus: AnimeStatus,
 ) => void;
@@ -11,7 +11,7 @@ export class Anime {
   private rafId: number | undefined;
   private _status: AnimeStatus = 'ready';
 
-  private statusChangeCb?: StatusChangeCb;
+  private statusChangeCb?: AnimeStatusChangeCb;
 
   constructor(action?: AnimeAction) {
     this.action = action;
@@ -76,7 +76,7 @@ export class Anime {
     return this._status;
   }
 
-  onStatusChange(cb: StatusChangeCb) {
+  onStatusChange(cb: AnimeStatusChangeCb) {
     this.statusChangeCb = cb;
   }
 }

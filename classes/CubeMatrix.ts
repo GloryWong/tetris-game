@@ -8,14 +8,16 @@ export interface CubeMatrixCubePosition {
 
 export type BeforeTidyCb = (cubes: Cube[]) => void;
 export type AfterTidyCb = BeforeTidyCb;
+export type ClearRowsCb = (rows: number[]) => void;
 
 export class CubeMatrix {
-  private matrix; // row * col;
-  private rowCount;
-  private colCount;
+  private readonly matrix; // row * col;
+  private readonly rowCount;
+  private readonly colCount;
 
   private beforeTidyCb?: BeforeTidyCb;
   private afterTidyCb?: AfterTidyCb;
+  private clearRowsCb?: ClearRowsCb;
 
   constructor(rowCount: number, colCount: number) {
     this.matrix = this.createInitialCubes(rowCount, colCount);
@@ -55,7 +57,10 @@ export class CubeMatrix {
     const fullRows = this.filterFullRows(
       successAddedCubes.map((cube) => cube.row),
     );
-    this.clearRowsAndTidy(fullRows);
+    if (fullRows.length > 0) {
+      this.clearRowsAndTidy(fullRows);
+      this.clearRowsCb?.(fullRows);
+    }
 
     return successAddedCubes;
   }
@@ -230,12 +235,14 @@ export class CubeMatrix {
   }
 
   clear() {
-    this.matrix = this.createInitialCubes(this.rowCount, this.colCount);
+    this.matrix.splice(
+      0,
+      this.matrix.length,
+      ...this.createInitialCubes(this.rowCount, this.colCount),
+    );
   }
 
   private clearRowsAndTidy(clearedRows: number[]) {
-    if (clearedRows.length === 0) return;
-
     this.beforeTidyCb?.(this.cubes);
 
     const matrix = this.matrix;
@@ -264,5 +271,9 @@ export class CubeMatrix {
 
   onAfterTidy(cb: AfterTidyCb) {
     this.afterTidyCb = cb;
+  }
+
+  onClearRows(cb: ClearRowsCb) {
+    this.clearRowsCb = cb;
   }
 }

@@ -1,14 +1,21 @@
 import { Anime } from './Anime';
 import { CubeMatrix, CubeMatrixSide } from './CubeMatrix';
 import { Shape } from './Shape';
+import { DEFAULT_CONFIG } from './constants';
+
+export interface BoardOptions {
+  cubeSize?: number;
+  rowCount?: number;
+  colCount?: number;
+}
 
 export class Board extends Anime {
   readonly ctx: CanvasRenderingContext2D;
   readonly cubeSize;
   readonly width;
   readonly height;
-  readonly rowCount = 20;
-  readonly colCount = 10;
+  readonly rowCount;
+  readonly colCount;
   private _currentShape: Shape | null = null;
   private cubeMatrix;
 
@@ -17,7 +24,11 @@ export class Board extends Anime {
   private shapeFixedCb?: () => void;
   private stopCb?: () => void;
 
-  constructor(container: HTMLElement, cubeSize: number) {
+  constructor(
+    container: HTMLElement,
+    cubeMatrix: CubeMatrix,
+    options: BoardOptions = {},
+  ) {
     super();
     this.setAction(this.moveDown);
     const canvas = document.createElement('canvas');
@@ -26,9 +37,11 @@ export class Board extends Anime {
     if (!ctx) throw new Error('Canvas unsupported');
 
     this.ctx = ctx;
-    this.cubeSize = cubeSize;
-    this.width = canvas.width = cubeSize * this.colCount;
-    this.height = canvas.height = cubeSize * this.rowCount;
+    this.cubeSize = options.cubeSize ?? DEFAULT_CONFIG.CUBE_SIZE;
+    this.rowCount = options.rowCount ?? DEFAULT_CONFIG.ROW_COUNT;
+    this.colCount = options.colCount ?? DEFAULT_CONFIG.COL_COUNT;
+    this.width = canvas.width = this.cubeSize * this.colCount;
+    this.height = canvas.height = this.cubeSize * this.rowCount;
 
     container.style.display = 'flex';
     container.style.justifyContent = 'center';
@@ -44,7 +57,7 @@ export class Board extends Anime {
 
     this.initBg(bgCanvas);
 
-    this.cubeMatrix = new CubeMatrix(this.rowCount, this.colCount);
+    this.cubeMatrix = cubeMatrix;
     this.cubeMatrix.onBeforeTidy((cubes) =>
       cubes.forEach((cube) => cube.clear()),
     );
@@ -72,14 +85,6 @@ export class Board extends Anime {
       ctx.lineTo(pos, this.height);
     }
     ctx.stroke();
-  }
-
-  private canMove(shape: Shape, direction: CubeMatrixSide) {
-    return !shape.current.some(
-      (cube) =>
-        this.cubeMatrix.isTouchBorder(cube, direction) ||
-        this.cubeMatrix.hasCubeNeighbour(cube, direction),
-    );
   }
 
   private canRotate(shape: Shape) {
