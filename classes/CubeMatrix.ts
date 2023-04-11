@@ -34,17 +34,26 @@ export class CubeMatrix {
   }
 
   private addCube(cube: Cube) {
-    if (this.isOccupied(cube) || this.expectOverBorder(cube, 'top')) return;
+    if (this.isOccupied(cube) || this.expectOverBorder(cube, 'top'))
+      return false;
     this.matrix[cube.row][cube.col] = cube;
+    return true;
   }
 
   addCubes(cubes: Cube[]) {
+    const successAddedCubes: Cube[] = [];
     cubes.forEach((cube) => {
-      this.addCube(cube);
+      if (this.addCube(cube)) {
+        successAddedCubes.push(cube);
+      }
     });
 
-    const fullRows = this.filterFullRows(cubes.map((cube) => cube.row));
+    const fullRows = this.filterFullRows(
+      successAddedCubes.map((cube) => cube.row),
+    );
     this.clearRowsAndTidy(fullRows);
+
+    return successAddedCubes;
   }
 
   get cubes() {
