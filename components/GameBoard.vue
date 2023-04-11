@@ -46,12 +46,6 @@ onMounted(() => {
         board.moveLeft();
         break;
       case 'Enter':
-        board.start();
-        break;
-      case ' ':
-        board.toggle();
-        break;
-      case 'Spacebar':
         board.toggle();
         break;
     }

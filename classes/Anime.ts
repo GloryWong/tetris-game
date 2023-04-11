@@ -55,6 +55,11 @@ export class Anime {
   }
 
   toggle() {
+    if (this._status === 'ready') {
+      this.start();
+      return;
+    }
+
     if (this._status === 'running') {
       this.pause();
     } else {
