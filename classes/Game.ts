@@ -1,5 +1,6 @@
 import { Board } from './Board';
 import { NextShapeBoard } from './NextShapeBoard';
+import { UserInteraction } from './UserInteraction';
 
 interface GameOptions {
   cubeSize?: number;
@@ -10,6 +11,7 @@ interface GameOptions {
 export class Game {
   readonly board;
   readonly nextShapeBoard;
+  readonly userInteraction;
 
   constructor(boardContainer: HTMLElement, options: GameOptions = {}) {
     const {
@@ -17,6 +19,8 @@ export class Game {
       nextShapeContainer,
       nextShapeCubeSize = cubeSize,
     } = options;
+
+    // Board
     this.board = new Board(boardContainer, cubeSize);
     this.board.onBeforeStart(() => {
       if (!this.board.hasCurrentShape()) {
@@ -32,6 +36,9 @@ export class Game {
       nextShapeContainer,
       nextShapeCubeSize,
     );
+
+    // Bind interact event listeners
+    this.userInteraction = this.setupUserInteraction();
   }
 
   private updateBoardCurrentShape() {
@@ -40,5 +47,28 @@ export class Game {
       const shape = shapeCreator(this.board.ctx, this.board.cubeSize);
       this.board.setCurrentShape(shape);
     }
+  }
+
+  private setupUserInteraction() {
+    return new UserInteraction({
+      ArrowUp: () => this.board.rotate(),
+      ArrowDown: {
+        action: () => this.board.moveDown(),
+        longPressAction: () => this.board.moveDown(2),
+      },
+      ArrowRight: {
+        action: () => this.board.moveRight(),
+        longPressAction: () => this.board.moveRight(2),
+      },
+      ArrowLeft: {
+        action: () => this.board.moveLeft(),
+        longPressAction: () => this.board.moveLeft(2),
+      },
+      Enter: () => this.board.toggle(),
+    });
+  }
+
+  destroy() {
+    this.userInteraction.destroy();
   }
 }

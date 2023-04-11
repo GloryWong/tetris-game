@@ -56,11 +56,15 @@ export class NextShapeBoard {
     return getRandom(0, this.shapeCreators.length);
   }
 
-  private enqueueShapeCreator() {
-    const shapeCreator = this.shapeCreators[this.getRandomIndex()];
+  private render(shapeCreator: NextShapeBoardShapeCreator) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     shapeCreator(this.ctx, this.cubeSize).draw();
+  }
+
+  private enqueueShapeCreator() {
+    const shapeCreator = this.shapeCreators[this.getRandomIndex()];
     this.shapeCreatorQueue.unshift(shapeCreator);
+    this.render(shapeCreator);
   }
 
   dequeueShapeCreator() {

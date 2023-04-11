@@ -1,6 +1,10 @@
 import { Cube } from './Cube';
 
 export type CubeMatrixSide = 'top' | 'bottom' | 'left' | 'right';
+export interface CubeMatrixCubePosition {
+  row: number;
+  col: number;
+}
 
 export type BeforeTidyCb = (cubes: Cube[]) => void;
 export type AfterTidyCb = BeforeTidyCb;
@@ -34,7 +38,7 @@ export class CubeMatrix {
   }
 
   private addCube(cube: Cube) {
-    if (this.isOccupied(cube) || this.expectOverBorder(cube, 'top'))
+    if (this.isCubeOccupied(cube) || this.isCubeOverBorder(cube, 'top'))
       return false;
     this.matrix[cube.row][cube.col] = cube;
     return true;
@@ -69,7 +73,7 @@ export class CubeMatrix {
     return this.getCube(row, col) !== undefined;
   }
 
-  hasNeighbour(cube: Cube, side: CubeMatrixSide) {
+  hasCubeNeighbour(cube: Cube, side: CubeMatrixSide) {
     switch (side) {
       case 'top':
         return this.hasCube(cube.row - 1, cube.col);
@@ -95,29 +99,134 @@ export class CubeMatrix {
     }
   }
 
-  isOccupied(cube: Cube) {
-    return this.hasCube(cube.row, cube.col);
+  isOccupied(row: number, col: number) {
+    return this.hasCube(row, col);
   }
 
-  isOverlap(cubes: Cube[]) {
-    return cubes.some((cube) => this.isOccupied(cube));
+  isOverlap(positions: CubeMatrixCubePosition[]) {
+    return positions.some(({ row, col }) => this.isOccupied(row, col));
   }
 
-  expectOverBorder(cube: Cube, border: CubeMatrixSide) {
+  isCubeOccupied({ row, col }: Cube) {
+    return this.isOccupied(row, col);
+  }
+
+  isCubesOverlap(cubes: Cube[]) {
+    return cubes.some((cube) => this.isCubeOccupied(cube));
+  }
+
+  isOverBorder(row: number, col: number, border: CubeMatrixSide) {
     switch (border) {
       case 'top':
-        return cube.row < 0;
+        return row < 0;
       case 'bottom':
-        return cube.row > this.rowCount - 1;
+        return row > this.rowCount - 1;
       case 'left':
-        return cube.col < 0;
+        return col < 0;
       case 'right':
-        return cube.col > this.colCount - 1;
+        return col > this.colCount - 1;
     }
   }
 
-  expectOverBorders(cube: Cube, borders: CubeMatrixSide[]) {
-    return borders.some((border) => this.expectOverBorder(cube, border));
+  isCubeOverBorder({ row, col }: Cube, border: CubeMatrixSide) {
+    return this.isOverBorder(row, col, border);
+  }
+
+  isCubeOverBorders(cube: Cube, borders: CubeMatrixSide[]) {
+    return borders.some((border) => this.isCubeOverBorder(cube, border));
+  }
+
+  private calcCubeAvailableTopOffset(cube: Cube) {
+    const { row, col } = cube;
+    if (col < 0 || col > this.colCount - 1) return row;
+    if (row <= 0) return 0;
+
+    for (let i = row - 1; i >= 0; i--) {
+      const _cube = this.matrix[i][col];
+      if (_cube) {
+        return row - _cube.row - 1;
+      }
+    }
+
+    return row;
+  }
+
+  private calcCubeAvailableBottomOffset(cube: Cube) {
+    const { row, col } = cube;
+    if (col < 0 || col > this.colCount - 1) return row;
+    if (row >= this.rowCount - 1) return 0;
+
+    for (let i = row + 1; i < this.rowCount; i++) {
+      const _cube = this.matrix[i][col];
+      if (_cube) {
+        return _cube.row - row - 1;
+      }
+    }
+
+    return this.rowCount - row - 1;
+  }
+
+  private calcCubeAvailableLeftOffset(cube: Cube) {
+    const { row, col } = cube;
+    if (row < 0 || row > this.rowCount - 1) return col;
+    if (col <= 0) return 0;
+
+    for (let i = col - 1; i >= 0; i--) {
+      const _cube = this.matrix[row][i];
+      if (_cube) {
+        return col - _cube.col - 1;
+      }
+    }
+
+    return col;
+  }
+
+  private calcCubeAvailableRightOffset(cube: Cube) {
+    const { row, col } = cube;
+    if (row < 0 || row > this.rowCount - 1) return col;
+    if (col >= this.colCount - 1) return 0;
+
+    for (let i = col + 1; i < this.colCount; i++) {
+      const _cube = this.matrix[row][i];
+      if (_cube) {
+        return _cube.col - col - 1;
+      }
+    }
+
+    return this.colCount - col - 1;
+  }
+
+  private calcCubeAvailableOffset(cube: Cube, direction: CubeMatrixSide) {
+    switch (direction) {
+      case 'top':
+        return this.calcCubeAvailableTopOffset(cube);
+      case 'bottom':
+        return this.calcCubeAvailableBottomOffset(cube);
+      case 'left':
+        return this.calcCubeAvailableLeftOffset(cube);
+      case 'right':
+        return this.calcCubeAvailableRightOffset(cube);
+    }
+  }
+
+  calcCubeRectifiedOffset(
+    cube: Cube,
+    expectOffsetValue: number, // must be positive
+    direction: CubeMatrixSide,
+  ) {
+    const avaiableOffset = this.calcCubeAvailableOffset(cube, direction);
+    return Math.min(expectOffsetValue, avaiableOffset);
+  }
+
+  calcCubesRectifiedOffset(
+    cubes: Cube[],
+    expectOffsetValue: number, // must be positive
+    direction: CubeMatrixSide,
+  ) {
+    return Math.min(
+      expectOffsetValue,
+      ...cubes.map((cube) => this.calcCubeAvailableOffset(cube, direction)),
+    );
   }
 
   clear() {

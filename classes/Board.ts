@@ -12,6 +12,7 @@ export class Board extends Anime {
   private _currentShape: Shape | null = null;
   private cubeMatrix;
 
+  // callbacks
   private beforeStartCb?: () => void;
   private shapeFixedCb?: () => void;
   private stopCb?: () => void;
@@ -28,6 +29,7 @@ export class Board extends Anime {
     this.cubeSize = cubeSize;
     this.width = canvas.width = cubeSize * this.colCount;
     this.height = canvas.height = cubeSize * this.rowCount;
+
     container.style.display = 'flex';
     container.style.justifyContent = 'center';
     container.style.position = 'relative';
@@ -72,55 +74,68 @@ export class Board extends Anime {
     ctx.stroke();
   }
 
-  private canMove(shape: Shape, dir: CubeMatrixSide) {
+  private canMove(shape: Shape, direction: CubeMatrixSide) {
     return !shape.current.some(
       (cube) =>
-        this.cubeMatrix.isTouchBorder(cube, dir) ||
-        this.cubeMatrix.hasNeighbour(cube, dir),
+        this.cubeMatrix.isTouchBorder(cube, direction) ||
+        this.cubeMatrix.hasCubeNeighbour(cube, direction),
     );
   }
 
   private canRotate(shape: Shape) {
     return !shape.next.some(
       (cube) =>
-        this.cubeMatrix.expectOverBorders(cube, ['bottom', 'left', 'right']) ||
-        this.cubeMatrix.isOccupied(cube),
+        this.cubeMatrix.isCubeOverBorders(cube, ['bottom', 'left', 'right']) ||
+        this.cubeMatrix.isCubeOccupied(cube),
     );
   }
 
-  moveDown() {
+  private calcAvailableStep(
+    shape: Shape,
+    expectStep: number,
+    direction: CubeMatrixSide,
+  ) {
+    return this.cubeMatrix.calcCubesRectifiedOffset(
+      shape.current,
+      expectStep,
+      direction,
+    );
+  }
+
+  moveDown(step = 1) {
     if (this.status !== 'running') return;
     if (!this._currentShape) return;
 
-    if (this.canMove(this._currentShape, 'bottom')) {
-      this._currentShape.moveDown();
-      return;
+    const _step = this.calcAvailableStep(this._currentShape, step, 'bottom');
+    if (_step > 0) {
+      this._currentShape.moveDown(_step);
+    } else {
+      this.cubeMatrix.addCubes(this._currentShape.current);
+      this.shapeFixedCb?.();
     }
-
-    this.cubeMatrix.addCubes(this._currentShape.current);
-    this.shapeFixedCb?.();
   }
 
-  moveRight() {
+  moveRight(step = 1) {
     if (this.status !== 'running') return;
+    if (!this._currentShape) return;
 
-    if (this._currentShape)
-      this.canMove(this._currentShape, 'right') &&
-        this._currentShape.moveRight();
+    const _step = this.calcAvailableStep(this._currentShape, step, 'right');
+    if (_step > 0) this._currentShape.moveRight(_step);
   }
 
-  moveLeft() {
+  moveLeft(step = 1) {
     if (this.status !== 'running') return;
+    if (!this._currentShape) return;
 
-    if (this._currentShape)
-      this.canMove(this._currentShape, 'left') && this._currentShape.moveLeft();
+    const _step = this.calcAvailableStep(this._currentShape, step, 'left');
+    if (_step > 0) this._currentShape.moveLeft(_step);
   }
 
   rotate() {
     if (this.status !== 'running') return;
 
-    if (this._currentShape)
-      this.canRotate(this._currentShape) && this._currentShape.rotate();
+    if (this._currentShape && this.canRotate(this._currentShape))
+      this._currentShape.rotate();
   }
 
   private clear() {
@@ -153,10 +168,10 @@ export class Board extends Anime {
     const initialCol = Math.floor(this.colCount / 2) - 2;
 
     shape.moveTo(-1, initialCol);
-    if (this.cubeMatrix.isOverlap(shape.current)) {
+    if (this.cubeMatrix.isCubesOverlap(shape.current)) {
       shape.moveTo(-2, initialCol);
     }
-    if (this.cubeMatrix.isOverlap(shape.current)) {
+    if (this.cubeMatrix.isCubesOverlap(shape.current)) {
       this.stop();
       return;
     }

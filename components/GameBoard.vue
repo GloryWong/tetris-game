@@ -18,9 +18,10 @@ import { Game } from '~/classes/Game';
 const container = ref<HTMLElement>();
 const nextShapeContainer = ref<HTMLElement>();
 const status = ref<AnimeStatus>();
+let game: Game;
 
 onMounted(() => {
-  const game = new Game(container.value!, {
+  game = new Game(container.value!, {
     nextShapeContainer: nextShapeContainer.value!,
   });
   window.__game__ = game;
@@ -30,25 +31,9 @@ onMounted(() => {
   board.onStatusChange((val) => {
     status.value = val;
   });
+});
 
-  document.addEventListener('keyup', (evt) => {
-    switch (evt.key) {
-      case 'ArrowUp':
-        board.rotate();
-        break;
-      case 'ArrowDown':
-        board.moveDown();
-        break;
-      case 'ArrowRight':
-        board.moveRight();
-        break;
-      case 'ArrowLeft':
-        board.moveLeft();
-        break;
-      case 'Enter':
-        board.toggle();
-        break;
-    }
-  });
+onUnmounted(() => {
+  game?.destroy();
 });
 </script>

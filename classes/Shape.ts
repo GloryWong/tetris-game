@@ -81,16 +81,16 @@ export abstract class Shape {
     return i % this.cubesSet.length;
   }
 
-  moveDown() {
-    this.move(1, 0, true);
+  moveDown(step = 1) {
+    this.move(step, 0, true);
   }
 
-  moveRight() {
-    this.move(0, 1, true);
+  moveRight(step = 1) {
+    this.move(0, step, true);
   }
 
-  moveLeft() {
-    this.move(0, -1, true);
+  moveLeft(step = 1) {
+    this.move(0, -1 * step, true);
   }
 
   rotate() {
