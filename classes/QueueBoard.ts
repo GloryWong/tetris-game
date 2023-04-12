@@ -11,17 +11,17 @@ function getRandom(min: number, max: number) {
   return Math.floor(min + Math.random() * (max - min));
 }
 
-type NextShapeBoardShapeCreator = (
+type QueueBoardShapeCreator = (
   ctx: CanvasRenderingContext2D,
   cubeSize: number,
 ) => Shape;
 
-export class NextShapeBoard {
+export class QueueBoard {
   private readonly canvas;
   readonly cubeSize;
   private readonly ctx;
-  readonly shapeCreatorQueue: NextShapeBoardShapeCreator[] = [];
-  private readonly shapeCreators: NextShapeBoardShapeCreator[] = [
+  readonly shapeCreatorQueue: QueueBoardShapeCreator[] = [];
+  private readonly shapeCreators: QueueBoardShapeCreator[] = [
     (ctx: CanvasRenderingContext2D, cubeSize: number) =>
       new IShape(ctx, cubeSize),
     (ctx: CanvasRenderingContext2D, cubeSize: number) =>
@@ -56,7 +56,7 @@ export class NextShapeBoard {
     return getRandom(0, this.shapeCreators.length);
   }
 
-  private render(shapeCreator: NextShapeBoardShapeCreator) {
+  private render(shapeCreator: QueueBoardShapeCreator) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     shapeCreator(this.ctx, this.cubeSize).draw();
   }

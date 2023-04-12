@@ -4,13 +4,13 @@ import { CubeMatrix, CubeMatrixSide } from './CubeMatrix';
 import { Shape } from './Shape';
 import { DEFAULT_CONFIG } from './constants';
 
-export interface BoardOptions {
+export interface FieldBoardOptions {
   cubeSize?: number;
   rowCount?: number;
   colCount?: number;
 }
 
-export class Board extends Anime {
+export class FieldBoard extends Anime {
   readonly ctx: CanvasRenderingContext2D;
   readonly cubeSize;
   readonly width;
@@ -28,7 +28,7 @@ export class Board extends Anime {
   constructor(
     container: HTMLElement,
     cubeMatrix: CubeMatrix,
-    options: BoardOptions = {},
+    options: FieldBoardOptions = {},
   ) {
     super();
     this.setAction(this.moveDown);
@@ -170,7 +170,7 @@ export class Board extends Anime {
       this.beforeStartCb();
     }
     if (this._currentShape === undefined) {
-      console.warn('Board.currentShape is not set yet');
+      console.warn('FieldBoard.currentShape is not set yet');
     }
     super.start();
   }

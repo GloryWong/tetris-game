@@ -1,30 +1,30 @@
-import { Board, BoardOptions } from './Board';
+import { FieldBoard, FieldBoardOptions } from './FieldBoard';
 import { CubeMatrix } from './CubeMatrix';
-import { NextShapeBoard } from './NextShapeBoard';
+import { QueueBoard } from './QueueBoard';
 import { ScoreSystem } from './ScoreSystem';
 import { UserInteraction } from './UserInteraction';
 import { DEFAULT_CONFIG } from './constants';
 
-interface GameOptions extends BoardOptions {
+interface GameOptions extends FieldBoardOptions {
   cubeSize?: number;
-  nextShapeContainer?: HTMLElement;
-  nextShapeCubeSize?: number;
+  queueContainer?: HTMLElement;
+  queueCubeSize?: number;
 }
 
 export class Game {
   private readonly cubeMatrix;
-  private readonly board;
-  private readonly nextShapeBoard;
+  private readonly fieldBoard;
+  private readonly queueBoard;
   private readonly userInteraction;
   private readonly scoreSystem;
 
-  constructor(boardContainer: HTMLElement, options: GameOptions = {}) {
+  constructor(FieldBoardContainer: HTMLElement, options: GameOptions = {}) {
     const {
       cubeSize = DEFAULT_CONFIG.CUBE_SIZE,
       rowCount = DEFAULT_CONFIG.ROW_COUNT,
       colCount = DEFAULT_CONFIG.COL_COUNT,
-      nextShapeContainer,
-      nextShapeCubeSize = cubeSize,
+      queueContainer,
+      queueCubeSize = cubeSize,
     } = options;
 
     // Cube Matrix
@@ -33,23 +33,24 @@ export class Game {
       this.scoreSystem.addLines(rows.length);
     });
 
-    // Board
-    this.board = new Board(boardContainer, this.cubeMatrix, options);
-    this.board.onBeforeStart(() => {
+    // Field Board
+    this.fieldBoard = new FieldBoard(
+      FieldBoardContainer,
+      this.cubeMatrix,
+      options,
+    );
+    this.fieldBoard.onBeforeStart(() => {
       this.scoreSystem.reset();
-      if (!this.board.hasCurrentShape()) {
-        this.updateBoardCurrentShape();
+      if (!this.fieldBoard.hasCurrentShape()) {
+        this.updateFieldBoardCurrentShape();
       }
     });
-    this.board.onShapeFixed(() => {
-      this.updateBoardCurrentShape();
+    this.fieldBoard.onShapeFixed(() => {
+      this.updateFieldBoardCurrentShape();
     });
 
-    // Next Shape Board
-    this.nextShapeBoard = new NextShapeBoard(
-      nextShapeContainer,
-      nextShapeCubeSize,
-    );
+    // Queue Board
+    this.queueBoard = new QueueBoard(queueContainer, queueCubeSize);
 
     // Score system
     this.scoreSystem = new ScoreSystem(options.colCount);
@@ -58,30 +59,30 @@ export class Game {
     this.userInteraction = this.setupUserInteraction();
   }
 
-  private updateBoardCurrentShape() {
-    const shapeCreator = this.nextShapeBoard.dequeueShapeCreator();
+  private updateFieldBoardCurrentShape() {
+    const shapeCreator = this.queueBoard.dequeueShapeCreator();
     if (shapeCreator) {
-      const shape = shapeCreator(this.board.ctx, this.board.cubeSize);
-      this.board.setCurrentShape(shape);
+      const shape = shapeCreator(this.fieldBoard.ctx, this.fieldBoard.cubeSize);
+      this.fieldBoard.setCurrentShape(shape);
     }
   }
 
   private setupUserInteraction() {
     return new UserInteraction({
-      ArrowUp: () => this.board.rotate(),
+      ArrowUp: () => this.fieldBoard.rotate(),
       ArrowDown: {
-        action: () => this.board.moveDown(),
-        longPressAction: () => this.board.moveDown(2),
+        action: () => this.fieldBoard.moveDown(),
+        longPressAction: () => this.fieldBoard.moveDown(2),
       },
       ArrowRight: {
-        action: () => this.board.moveRight(),
-        longPressAction: () => this.board.moveRight(2),
+        action: () => this.fieldBoard.moveRight(),
+        longPressAction: () => this.fieldBoard.moveRight(2),
       },
       ArrowLeft: {
-        action: () => this.board.moveLeft(),
-        longPressAction: () => this.board.moveLeft(2),
+        action: () => this.fieldBoard.moveLeft(),
+        longPressAction: () => this.fieldBoard.moveLeft(2),
       },
-      ' ': () => this.board.toggle(),
+      ' ': () => this.fieldBoard.toggle(),
     });
   }
 
@@ -90,11 +91,11 @@ export class Game {
   }
 
   get status() {
-    return this.board.status;
+    return this.fieldBoard.status;
   }
 
-  onStatusChange(...args: Parameters<Board['onStatusChange']>) {
-    this.board.onStatusChange(...args);
+  onStatusChange(...args: Parameters<FieldBoard['onStatusChange']>) {
+    this.fieldBoard.onStatusChange(...args);
   }
 
   get score() {

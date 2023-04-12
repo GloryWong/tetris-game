@@ -2,7 +2,7 @@
   <div class="flex flex-row justify-center p-5">
     <div ref="container"></div>
     <div class="flex h-full flex-col space-y-3 p-5">
-      <div ref="nextShapeContainer"></div>
+      <div ref="queueContainer"></div>
       <div class="flex flex-col space-y-2">
         <div class="flex flex-row space-x-5">
           <div>Lines</div>
@@ -22,7 +22,7 @@ import { AnimeStatus } from '~/classes/Anime';
 import { Game } from '~/classes/Game';
 
 const container = ref<HTMLElement>();
-const nextShapeContainer = ref<HTMLElement>();
+const queueContainer = ref<HTMLElement>();
 const status = ref<AnimeStatus>();
 const score = ref<number>(0);
 const lines = ref<number>(0);
@@ -31,7 +31,7 @@ let game: Game;
 
 onMounted(() => {
   game = new Game(container.value!, {
-    nextShapeContainer: nextShapeContainer.value!,
+    queueContainer: queueContainer.value!,
   });
   window.__game__ = game;
 
