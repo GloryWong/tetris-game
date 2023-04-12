@@ -1,4 +1,5 @@
 import { Anime } from './Anime';
+import { Cube } from './Cube';
 import { CubeMatrix, CubeMatrixSide } from './CubeMatrix';
 import { Shape } from './Shape';
 import { DEFAULT_CONFIG } from './constants';
@@ -47,15 +48,12 @@ export class Board extends Anime {
     container.style.justifyContent = 'center';
     container.style.position = 'relative';
     canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
+    canvas.style.top = `${this.cubeSize}px`;
+    canvas.style.left = `${this.cubeSize}px`;
 
     const bgCanvas = document.createElement('canvas');
-    bgCanvas.width = this.width;
-    bgCanvas.height = this.height;
-    container.append(bgCanvas, canvas);
-
     this.initBg(bgCanvas);
+    container.append(bgCanvas, canvas);
 
     this.cubeMatrix = cubeMatrix;
     this.cubeMatrix.onBeforeTidy((cubes) =>
@@ -67,22 +65,39 @@ export class Board extends Anime {
   }
 
   private initBg(canvas: HTMLCanvasElement) {
-    canvas.style.backgroundColor = '#012';
+    canvas.width = this.width + this.cubeSize * 2;
+    canvas.height = this.height + this.cubeSize * 2;
+    canvas.style.backgroundColor = '#000';
     const ctx = canvas.getContext('2d')!;
 
-    ctx.strokeStyle = '#123';
+    // borders
+    const color = '#787878';
+    for (let i = 0, len = this.colCount + 2; i < len; i++) {
+      new Cube(ctx, 0, i, this.cubeSize, color).render();
+    }
+    for (let i = 1, len = this.rowCount + 1; i < len; i++) {
+      new Cube(ctx, i, this.colCount + 1, this.cubeSize, color).render();
+    }
+    for (let i = 0, len = this.colCount + 2; i < len; i++) {
+      new Cube(ctx, this.rowCount + 1, i, this.cubeSize, color).render();
+    }
+    for (let i = 1, len = this.rowCount + 1; i < len; i++) {
+      new Cube(ctx, i, 0, this.cubeSize, color).render();
+    }
+
+    ctx.strokeStyle = '#333';
     ctx.beginPath();
     // row lines
-    for (let i = 0; i < this.rowCount - 1; i++) {
+    for (let i = 1; i < this.rowCount; i++) {
       const pos = this.cubeSize * (i + 1);
-      ctx.moveTo(0, pos);
-      ctx.lineTo(this.width, pos);
+      ctx.moveTo(this.cubeSize, pos);
+      ctx.lineTo(this.width + this.cubeSize, pos);
     }
     // col lines
-    for (let i = 0; i < this.colCount - 1; i++) {
+    for (let i = 1; i < this.colCount; i++) {
       const pos = this.cubeSize * (i + 1);
-      ctx.moveTo(pos, 0);
-      ctx.lineTo(pos, this.height);
+      ctx.moveTo(pos, this.cubeSize);
+      ctx.lineTo(pos, this.height + this.cubeSize);
     }
     ctx.stroke();
   }

@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 
 export class ZShape extends Shape {
   constructor(ctx: CanvasRenderingContext2D, cubeSize: number) {
-    super(ctx, cubeSize, 'red', [
+    super(ctx, cubeSize, '#bd261a', [
       [
         [1, 1],
         [1, 2],

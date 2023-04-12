@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 
 export class OShape extends Shape {
   constructor(ctx: CanvasRenderingContext2D, cubeSize: number) {
-    super(ctx, cubeSize, 'yellow', [
+    super(ctx, cubeSize, '#cecb42', [
       [
         [1, 1],
         [1, 2],

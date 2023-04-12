@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 
 export class SShape extends Shape {
   constructor(ctx: CanvasRenderingContext2D, cubeSize: number) {
-    super(ctx, cubeSize, 'green', [
+    super(ctx, cubeSize, '#5dc83b', [
       [
         [1, 2],
         [1, 3],

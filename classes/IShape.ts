@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 
 export class IShape extends Shape {
   constructor(ctx: CanvasRenderingContext2D, cubeSize: number) {
-    super(ctx, cubeSize, 'cyan', [
+    super(ctx, cubeSize, '#5bcacc', [
       [
         [1, 0],
         [1, 1],

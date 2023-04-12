@@ -24,7 +24,52 @@ export class Cube {
   render() {
     const ctx = this.ctx;
     ctx.fillStyle = this.fillStyle;
-    ctx.fillRect(this.x + 1, this.y + 1, this.size - 1, this.size - 1);
+    ctx.fillRect(this.x, this.y, this.size, this.size);
+
+    const sideWidth = this.size * 0.08;
+    const sideOpacity = 0.4;
+
+    // top
+    ctx.fillStyle = `rgba(255,255,255,${sideOpacity})`;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x + this.size, this.y);
+    ctx.lineTo(this.x + this.size - sideWidth, this.y + sideWidth);
+    ctx.lineTo(this.x + sideWidth, this.y + sideWidth);
+    ctx.closePath();
+    ctx.fill();
+
+    // right
+    ctx.fillStyle = `rgba(255,255,255,${sideOpacity})`;
+    ctx.beginPath();
+    ctx.moveTo(this.x + this.size, this.y);
+    ctx.lineTo(this.x + this.size, this.y + this.size);
+    ctx.lineTo(this.x + this.size - sideWidth, this.y + this.size - sideWidth);
+    ctx.lineTo(this.x + this.size - sideWidth, this.y + sideWidth);
+    ctx.closePath();
+    ctx.fill();
+
+    // bottom
+    ctx.fillStyle = `rgba(0,0,0,${sideOpacity})`;
+    ctx.beginPath();
+    ctx.moveTo(this.x + this.size, this.y + this.size);
+    ctx.lineTo(this.x, this.y + this.size);
+    ctx.lineTo(this.x + sideWidth, this.y + this.size - sideWidth);
+    ctx.lineTo(this.x + this.size - sideWidth, this.y + this.size - sideWidth);
+    ctx.closePath();
+    ctx.fill();
+
+    // left
+    ctx.fillStyle = `rgba(0,0,0,${sideOpacity})`;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y + this.size);
+    ctx.lineTo(this.x, this.y);
+    ctx.lineTo(this.x + sideWidth, this.y + sideWidth);
+    ctx.lineTo(this.x + sideWidth, this.y + this.size - sideWidth);
+    ctx.closePath();
+    ctx.fill();
+
+    // debug position
     // ctx.font = '13px serif';
     // ctx.textBaseline = 'top';
     // ctx.fillStyle = 'black';

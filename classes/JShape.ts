@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 
 export class JShape extends Shape {
   constructor(ctx: CanvasRenderingContext2D, cubeSize: number) {
-    super(ctx, cubeSize, 'blue', [
+    super(ctx, cubeSize, '#001ec5', [
       [
         [1, 1],
         [1, 2],
