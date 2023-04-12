@@ -31,6 +31,13 @@ export class CubeMatrix {
     );
   }
 
+  private calcCubesRows(cubes: Cube[]) {
+    return cubes.reduce<number[]>((result, { row }) => {
+      if (!result.includes(row)) result.push(row);
+      return result;
+    }, []);
+  }
+
   private isRowFull(row: number) {
     return !this.matrix[row].includes(undefined);
   }
@@ -54,9 +61,7 @@ export class CubeMatrix {
       }
     });
 
-    const fullRows = this.filterFullRows(
-      successAddedCubes.map((cube) => cube.row),
-    );
+    const fullRows = this.filterFullRows(this.calcCubesRows(successAddedCubes));
     if (fullRows.length > 0) {
       this.clearRowsAndTidy(fullRows);
       this.clearRowsCb?.(fullRows);
