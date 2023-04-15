@@ -21,11 +21,10 @@ export class Cube {
     this.fillStyle = this.color;
   }
 
-  render() {
+  private render() {
     const ctx = this.ctx;
     ctx.fillStyle = this.fillStyle;
     ctx.fillRect(this.x, this.y, this.size, this.size);
-
     const sideWidth = this.size * 0.08;
     const sideOpacity = 0.4;
 
@@ -82,9 +81,24 @@ export class Cube {
     this.ctx.clearRect(this.x, this.y, this.size, this.size);
   }
 
-  move(row: number, col: number) {
-    this.x += col * this.size;
-    this.y += row * this.size;
+  draw(row?: number, col?: number) {
+    const _row = row ?? this.row;
+    const _col = col ?? this.col;
+    this.x = _col * this.size;
+    this.y = _row * this.size;
+
+    this.render();
+  }
+
+  moveTo(row: number, col: number, draw = false) {
+    draw && this.clear();
+    this.x = col * this.size;
+    this.y = row * this.size;
+    draw && this.draw();
+  }
+
+  move(row: number, col: number, draw = false) {
+    this.moveTo(this.row + row, this.col + col, draw);
   }
 
   get col() {

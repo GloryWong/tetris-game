@@ -1,20 +1,34 @@
-import { Shape } from './Shape';
+import { Shape, ShapeOptions } from './Shape';
 
 export class SShape extends Shape {
-  constructor(ctx: CanvasRenderingContext2D, cubeSize: number) {
-    super(ctx, cubeSize, '#5dc83b', [
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    cubeSize: number,
+    options?: ShapeOptions,
+  ) {
+    super(
+      ctx,
+      cubeSize,
+      '#5dc83b',
       [
-        [1, 2],
-        [1, 3],
-        [2, 1],
-        [2, 2],
+        [
+          [1, 2],
+          [1, 3],
+          [2, 1],
+          [2, 2],
+        ],
+        [
+          [0, 1],
+          [1, 1],
+          [1, 2],
+          [2, 2],
+        ],
       ],
-      [
-        [0, 1],
-        [1, 1],
-        [1, 2],
-        [2, 2],
-      ],
-    ]);
+      options,
+    );
+  }
+
+  static create(...args: ConstructorParameters<typeof SShape>) {
+    return new SShape(...args);
   }
 }

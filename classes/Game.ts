@@ -1,46 +1,45 @@
-import { FieldBoard, FieldBoardOptions } from './FieldBoard';
+import { FieldBoard } from './FieldBoard';
 import { CubeMatrix } from './CubeMatrix';
-import { QueueBoard } from './QueueBoard';
-import { ScoreSystem } from './ScoreSystem';
+import { QueueBoard, QueueBoardOptions } from './QueueBoard';
+import { ScoreBoard } from './ScoreBoard';
 import { UserInteraction } from './UserInteraction';
-import { DEFAULT_CONFIG } from './constants';
 
-interface GameOptions extends FieldBoardOptions {
+type GameOptions = {
   cubeSize?: number;
-  queueContainer?: HTMLElement;
-  queueCubeSize?: number;
-}
+  rowCount?: number;
+  colCount?: number;
+} & QueueBoardOptions;
 
 export class Game {
   private readonly cubeMatrix;
   private readonly fieldBoard;
   private readonly queueBoard;
   private readonly userInteraction;
-  private readonly scoreSystem;
+  private readonly scoreBoard;
 
-  constructor(FieldBoardContainer: HTMLElement, options: GameOptions = {}) {
-    const {
-      cubeSize = DEFAULT_CONFIG.CUBE_SIZE,
-      rowCount = DEFAULT_CONFIG.ROW_COUNT,
-      colCount = DEFAULT_CONFIG.COL_COUNT,
-      queueContainer,
-      queueCubeSize = cubeSize,
-    } = options;
+  constructor(element: HTMLElement, options: GameOptions = {}) {
+    const { cubeSize = 30, rowCount = 20, colCount = 10 } = options;
+
+    // UI
+    const { fieldBoardContainer, queueBoardContainer, scoreBoardContainer } =
+      this.setupUI(element);
 
     // Cube Matrix
     this.cubeMatrix = new CubeMatrix(rowCount, colCount);
     this.cubeMatrix.onClearRows((rows) => {
-      this.scoreSystem.addLines(rows.length);
+      this.scoreBoard.addLines(rows.length);
     });
 
     // Field Board
     this.fieldBoard = new FieldBoard(
-      FieldBoardContainer,
+      fieldBoardContainer,
+      rowCount,
+      colCount,
+      cubeSize,
       this.cubeMatrix,
-      options,
     );
     this.fieldBoard.onBeforeStart(() => {
-      this.scoreSystem.reset();
+      this.scoreBoard.reset();
       if (!this.fieldBoard.hasCurrentShape()) {
         this.updateFieldBoardCurrentShape();
       }
@@ -50,17 +49,35 @@ export class Game {
     });
 
     // Queue Board
-    this.queueBoard = new QueueBoard(queueContainer, queueCubeSize);
+    this.queueBoard = new QueueBoard(queueBoardContainer, cubeSize, options);
 
     // Score system
-    this.scoreSystem = new ScoreSystem(options.colCount);
+    this.scoreBoard = new ScoreBoard(scoreBoardContainer);
 
     // Bind interact event listeners
     this.userInteraction = this.setupUserInteraction();
   }
 
+  private setupUI(element: HTMLElement) {
+    element.style.display = 'flex';
+    const fieldBoardContainer = document.createElement('div');
+    const queueBoardContainer = document.createElement('div');
+    const scoreBoardContainer = document.createElement('div');
+    element.append(
+      scoreBoardContainer,
+      fieldBoardContainer,
+      queueBoardContainer,
+    );
+
+    return {
+      fieldBoardContainer,
+      queueBoardContainer,
+      scoreBoardContainer,
+    };
+  }
+
   private updateFieldBoardCurrentShape() {
-    const shapeCreator = this.queueBoard.dequeueShapeCreator();
+    const shapeCreator = this.queueBoard.dequeueShapeCreatorAndRefresh();
     if (shapeCreator) {
       const shape = shapeCreator(this.fieldBoard.ctx, this.fieldBoard.cubeSize);
       this.fieldBoard.setCurrentShape(shape);
@@ -99,18 +116,18 @@ export class Game {
   }
 
   get score() {
-    return this.scoreSystem.score;
+    return this.scoreBoard.score;
   }
 
-  onScoreChange(...args: Parameters<ScoreSystem['onScoreChange']>) {
-    return this.scoreSystem.onScoreChange(...args);
+  onScoreChange(...args: Parameters<ScoreBoard['onScoreChange']>) {
+    return this.scoreBoard.onScoreChange(...args);
   }
 
   get lines() {
-    return this.scoreSystem.lines;
+    return this.scoreBoard.lines;
   }
 
-  onLinesChange(...args: Parameters<ScoreSystem['onLinesChange']>) {
-    return this.scoreSystem.onLinesChange(...args);
+  onLinesChange(...args: Parameters<ScoreBoard['onLinesChange']>) {
+    return this.scoreBoard.onLinesChange(...args);
   }
 }

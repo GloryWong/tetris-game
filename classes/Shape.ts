@@ -5,34 +5,39 @@ type ShapeIndex = FixedLengthArray<[row: number, col: number], 4>;
 
 type ShapeIndexes = ShapeIndex[];
 
+export interface ShapeOptions {
+  row?: number;
+  col?: number;
+  draw?: boolean;
+}
+
 export abstract class Shape {
-  readonly ctx;
+  private readonly ctx;
   private row = 0;
   private col = 0;
   readonly cubeSize;
   readonly color;
-  readonly cubesSet;
-  private currentIndex: number;
+  readonly shapeSet;
+  private currentIndex = 0;
 
   constructor(
     ctx: CanvasRenderingContext2D,
     cubeSize: number,
     color: string,
     shapeIndexes: ShapeIndexes,
+    options: ShapeOptions = {},
   ) {
     this.ctx = ctx;
     this.cubeSize = cubeSize;
     this.color = color;
+    this.row = options.row ?? 0;
+    this.col = options.col ?? 0;
 
-    this.cubesSet = this.createCubesSet(shapeIndexes);
-    this.currentIndex = 0;
-  }
+    this.shapeSet = this.createShapeSet(shapeIndexes);
 
-  draw(row?: number, col?: number) {
-    const _row = row ?? this.row;
-    const _col = col ?? this.col;
-
-    this.moveTo(_row, _col, true);
+    if (options.draw) {
+      this._draw();
+    }
   }
 
   private createCube(row: number, col: number) {
@@ -45,40 +50,45 @@ export abstract class Shape {
     );
   }
 
-  private createCubesSet(shapeIndexes: ShapeIndexes) {
+  private createShapeSet(shapeIndexes: ShapeIndexes) {
     return shapeIndexes.map((shapeIndex) =>
       shapeIndex.map(([row, col]) => this.createCube(row, col)),
     );
   }
 
-  private render() {
-    this.cubesSet[this.currentIndex].forEach((cube) => cube.render());
+  clear() {
+    this.current.forEach((cube) => cube.clear());
   }
 
-  private clear() {
-    this.cubesSet[this.currentIndex].forEach((cube) => cube.clear());
+  private _draw() {
+    this.current.forEach((cube) => cube.draw());
+  }
+
+  draw(row?: number, col?: number) {
+    const _row = row ?? this.row;
+    const _col = col ?? this.col;
+    this.moveTo(_row, _col, true);
   }
 
   moveTo(row: number, col: number, draw = false) {
-    const offsetRow = row - this.row;
-    const offsetCol = col - this.col;
-    this.move(offsetRow, offsetCol, draw);
+    const rowOffset = row - this.row;
+    const colOffset = col - this.col;
+    this.move(rowOffset, colOffset, draw);
   }
 
   move(row: number, col: number, draw = false) {
     this.row += row;
     this.col += col;
-
     draw && this.clear();
-    this.cubesSet.forEach((cubes) => {
-      cubes.forEach((cube) => cube.move(row, col));
-    });
-    draw && this.render();
+    this.shapeSet.forEach((shape) =>
+      shape.forEach((cube) => cube.move(row, col)),
+    );
+    draw && this._draw();
   }
 
   private get nextIndex() {
     const i = this.currentIndex + 1;
-    return i % this.cubesSet.length;
+    return i % this.shapeSet.length;
   }
 
   moveDown(step = 1) {
@@ -96,14 +106,14 @@ export abstract class Shape {
   rotate() {
     this.clear();
     this.currentIndex = this.nextIndex;
-    this.render();
+    this._draw();
   }
 
   get current() {
-    return this.cubesSet[this.currentIndex];
+    return this.shapeSet[this.currentIndex];
   }
 
   get next() {
-    return this.cubesSet[this.nextIndex];
+    return this.shapeSet[this.nextIndex];
   }
 }
