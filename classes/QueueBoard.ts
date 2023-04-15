@@ -27,7 +27,9 @@ export class QueueBoard {
     this.cubeSize = cubeSize;
     this.canvas.width = this.cubeSize * 4;
     this.canvas.height = this.queueSize * this.cubeSize * 4;
-    container.append(this.canvas);
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.append('NEXT', this.canvas);
 
     this.shapeCreatorQueue = this.createShapeCreatorQueue(this.queueSize);
     this.refresh();

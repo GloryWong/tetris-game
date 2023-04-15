@@ -37,7 +37,6 @@ export class FieldBoard extends Anime {
     this.height = this.rowCount * this.cubeSize;
 
     container.style.position = 'relative';
-    container.style.margin = '0 20px';
 
     const fieldCanvas = this.createFieldCanvas(
       this.cubeSize,

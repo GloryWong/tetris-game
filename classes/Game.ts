@@ -63,11 +63,12 @@ export class Game {
     const fieldBoardContainer = document.createElement('div');
     const queueBoardContainer = document.createElement('div');
     const scoreBoardContainer = document.createElement('div');
-    element.append(
-      scoreBoardContainer,
-      fieldBoardContainer,
-      queueBoardContainer,
-    );
+    const rightPanel = document.createElement('div');
+    rightPanel.style.display = 'flex';
+    rightPanel.style.flexDirection = 'column';
+    rightPanel.append(queueBoardContainer, scoreBoardContainer);
+    fieldBoardContainer.style.paddingRight = '30px';
+    element.append(fieldBoardContainer, rightPanel);
 
     return {
       fieldBoardContainer,

@@ -21,7 +21,7 @@ export class ScoreBoard {
     this.scoreValueEle = scoreValueEle;
     this.linesValueEle = linesValueEle;
 
-    container.style.padding = '20px';
+    container.style.margin = '20px 0';
     container.append(linesDisplayEle, scoreDisplayEle);
   }
 
@@ -44,7 +44,8 @@ export class ScoreBoard {
     valueEle.innerText = initialValue.toString();
     displayEle.style.display = 'flex';
     displayEle.style.justifyContent = 'space-between';
-    displayEle.style.width = '100px';
+    displayEle.style.width = '100%';
+    displayEle.style.margin = '10px 0';
     displayEle.append(titleEle, valueEle);
     return {
       displayEle,
