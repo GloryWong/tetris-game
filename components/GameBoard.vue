@@ -1,6 +1,7 @@
 <template>
-  <div class="flex flex-row justify-center p-5">
+  <div class="m-5 flex flex-col justify-center space-y-10">
     <div ref="container"></div>
+    <div class="text-gray-500">Tetris Game @ 2023</div>
   </div>
 </template>
 
