@@ -1,21 +1,4 @@
-import { IShape } from './IShape';
-import { JShape } from './JShape';
-import { LShape } from './LShape';
-import { OShape } from './OShape';
-import { SShape } from './SShape';
-import { Shape, ShapeOptions } from './Shape';
-import { TShape } from './TShape';
-import { ZShape } from './ZShape';
-
-function getRandom(min: number, max: number) {
-  return Math.floor(min + Math.random() * (max - min));
-}
-
-type QueueBoardShapeCreator = (
-  ctx: CanvasRenderingContext2D,
-  cubeSize: number,
-  options?: ShapeOptions,
-) => Shape;
+import { Shape } from './Shape';
 
 export interface QueueBoardOptions {
   queueSize?: number;
@@ -27,22 +10,6 @@ export class QueueBoard {
   private readonly ctx;
   private readonly queueSize;
   readonly shapeCreatorQueue;
-
-  private static readonly shapeCreators: QueueBoardShapeCreator[] = [
-    IShape.create,
-    LShape.create,
-    JShape.create,
-    ZShape.create,
-    SShape.create,
-    TShape.create,
-    OShape.create,
-  ];
-
-  private static getRandomShapeCreator() {
-    return QueueBoard.shapeCreators[
-      getRandom(0, QueueBoard.shapeCreators.length)
-    ];
-  }
 
   constructor(
     container: HTMLElement,
@@ -69,7 +36,7 @@ export class QueueBoard {
   private createShapeCreatorQueue(queueSize: number) {
     return Array(queueSize)
       .fill(undefined)
-      .map(() => QueueBoard.getRandomShapeCreator());
+      .map(() => Shape.getRandomCreator());
   }
 
   private refresh() {
@@ -83,7 +50,9 @@ export class QueueBoard {
     });
   }
 
-  private enqueueShapeCreator(shapeCreator: QueueBoardShapeCreator) {
+  private enqueueShapeCreator(
+    shapeCreator: ReturnType<typeof Shape.getRandomCreator>,
+  ) {
     this.shapeCreatorQueue.push(shapeCreator);
   }
 
@@ -93,7 +62,7 @@ export class QueueBoard {
 
   dequeueShapeCreatorAndRefresh() {
     const shapeCreator = this.dequeueShapeCreator();
-    this.enqueueShapeCreator(QueueBoard.getRandomShapeCreator());
+    this.enqueueShapeCreator(Shape.getRandomCreator());
     this.refresh();
     return shapeCreator;
   }

@@ -1,8 +1,9 @@
-import { FixedLengthArray } from 'type-fest';
 import { Cube } from './Cube';
+import shapesConfig from './shapes-config.json';
 
-type ShapeIndex = FixedLengthArray<[row: number, col: number], 4>;
+export type ShapeType = keyof typeof shapesConfig;
 
+type ShapeIndex = number[][];
 type ShapeIndexes = ShapeIndex[];
 
 export interface ShapeOptions {
@@ -11,48 +12,74 @@ export interface ShapeOptions {
   draw?: boolean;
 }
 
-export abstract class Shape {
+function getRandom(min: number, max: number) {
+  return Math.floor(min + Math.random() * (max - min));
+}
+
+function getShapeConfig(type: ShapeType) {
+  return shapesConfig[type];
+}
+
+function getRandomShapeTypes() {
+  const shapeTypes = Object.keys(shapesConfig) as ShapeType[];
+  return shapeTypes[getRandom(0, shapeTypes.length)];
+}
+
+export class Shape {
+  readonly type;
   private readonly ctx;
   private row = 0;
   private col = 0;
   readonly cubeSize;
-  readonly color;
   readonly shapeSet;
   private currentIndex = 0;
 
   constructor(
+    type: ShapeType,
     ctx: CanvasRenderingContext2D,
     cubeSize: number,
-    color: string,
-    shapeIndexes: ShapeIndexes,
     options: ShapeOptions = {},
   ) {
+    this.type = type;
     this.ctx = ctx;
     this.cubeSize = cubeSize;
-    this.color = color;
     this.row = options.row ?? 0;
     this.col = options.col ?? 0;
 
-    this.shapeSet = this.createShapeSet(shapeIndexes);
+    const { color, indexes } = getShapeConfig(type);
+    this.shapeSet = this.createShapeSet(indexes, color);
 
     if (options.draw) {
       this._draw();
     }
   }
 
-  private createCube(row: number, col: number) {
+  static createShape(...args: ConstructorParameters<typeof Shape>) {
+    return new Shape(...args);
+  }
+
+  static getRandomCreator() {
+    const type = getRandomShapeTypes();
+    return (
+      ctx: CanvasRenderingContext2D,
+      cubeSize: number,
+      options: ShapeOptions = {},
+    ) => new Shape(type, ctx, cubeSize, options);
+  }
+
+  private createShapeCube(row: number, col: number, color: string) {
     return new Cube(
       this.ctx,
       this.row + row,
       this.col + col,
       this.cubeSize,
-      this.color,
+      color,
     );
   }
 
-  private createShapeSet(shapeIndexes: ShapeIndexes) {
+  private createShapeSet(shapeIndexes: ShapeIndexes, color: string) {
     return shapeIndexes.map((shapeIndex) =>
-      shapeIndex.map(([row, col]) => this.createCube(row, col)),
+      shapeIndex.map(([row, col]) => this.createShapeCube(row, col, color)),
     );
   }
 
