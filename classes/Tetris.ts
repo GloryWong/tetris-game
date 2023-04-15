@@ -4,20 +4,20 @@ import { QueueBoard, QueueBoardOptions } from './QueueBoard';
 import { ScoreBoard } from './ScoreBoard';
 import { UserInteraction } from './UserInteraction';
 
-type GameOptions = {
+type TetrisOptions = {
   cubeSize?: number;
   rowCount?: number;
   colCount?: number;
 } & QueueBoardOptions;
 
-export class Game {
+export class Tetris {
   private readonly cubeMatrix;
   private readonly fieldBoard;
   private readonly queueBoard;
   private readonly userInteraction;
   private readonly scoreBoard;
 
-  constructor(element: HTMLElement, options: GameOptions = {}) {
+  constructor(element: HTMLElement, options: TetrisOptions = {}) {
     const { cubeSize = 30, rowCount = 20, colCount = 10 } = options;
 
     // UI

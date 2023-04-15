@@ -1,7 +1,7 @@
-import { Game } from '~/classes/Game';
+import { Tetris } from '~/classes/Tetris';
 
 declare global {
   interface Window {
-    __game__: Game;
+    __tetris__: Tetris;
   }
 }

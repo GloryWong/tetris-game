@@ -6,24 +6,24 @@
 
 <script setup lang="ts">
 import { AnimeStatus } from '~/classes/Anime';
-import { Game } from '~/classes/Game';
+import { Tetris } from '~/classes/Tetris.js';
 
 const container = ref<HTMLElement>();
 const status = ref<AnimeStatus>();
 
-let game: Game;
+let tetris: Tetris;
 
 onMounted(() => {
-  game = new Game(container.value!, { queueSize: 4 });
-  window.__game__ = game;
+  tetris = new Tetris(container.value!, { queueSize: 4 });
+  window.__tetris__ = tetris;
 
-  status.value = game.status;
-  game.onStatusChange((val) => {
+  status.value = tetris.status;
+  tetris.onStatusChange((val) => {
     status.value = val;
   });
 });
 
 onUnmounted(() => {
-  game?.destroy();
+  tetris?.destroy();
 });
 </script>
