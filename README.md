@@ -1,2 +1,4 @@
 # tetris-game
-Tetris Game
+Tetris Game written in typescript and vanilla canvas api.
+
+https://tetris.zhaozhao.today
